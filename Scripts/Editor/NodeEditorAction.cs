@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sirenix.Utilities;
 using UnityEditor;
 using UnityEngine;
 using XNodeEditor.Internal;
@@ -46,6 +47,11 @@ namespace XNodeEditor {
         public void Controls() {
             wantsMouseMove = true;
             Event e = Event.current;
+
+            //Dont process if mouse within minimap
+            if (miniMapRect.Contains(e.mousePosition))
+                return;
+
             switch (e.type) {
                 case EventType.DragUpdated:
                 case EventType.DragPerform:
@@ -307,6 +313,7 @@ namespace XNodeEditor {
                 case EventType.KeyDown:
                     if (EditorGUIUtility.editingTextField || GUIUtility.keyboardControl != 0) break;
                     else if (e.keyCode == KeyCode.F) Home();
+                    else if (e.keyCode == KeyCode.G) AddComment(e);
                     if (NodeEditorUtilities.IsMac()) {
                         if (e.keyCode == KeyCode.Return) RenameSelectedNode();
                     } else {
@@ -561,6 +568,64 @@ namespace XNodeEditor {
             EditorUtility.SetDirty(graph);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             autoConnectOutput = null;
+        }
+
+        public void AddComment(Event e)
+        {
+            CommentNode newComment = graphEditor.CreateNode(typeof(CommentNode), WindowToGridPosition(e.mousePosition))
+                                        as CommentNode;
+
+            //If nodes are selected, wrap them in this comment
+            if (!selectedNodes.IsNullOrEmpty())
+            {
+                Vector2 nodeSize;
+                if (!nodeSizes.ContainsKey(selectedNodes[0]))
+                    nodeSize = new Vector2(500f, 500f);
+                else
+                    nodeSize = nodeSizes[selectedNodes[0]];
+
+                //Init to pos of first node
+                Vector2 topLeftPos= selectedNodes[0].position;
+                Vector2 bottomRightPos = selectedNodes[0].position + nodeSize;
+
+                //Iterate through nodes and get actual top-left and bottom-right positions
+                foreach (var node in selectedNodes)
+                {
+                    if (!nodeSizes.ContainsKey(node))
+                        nodeSize = new Vector2(500f, 500f);
+                    else
+                        nodeSize = nodeSizes[node];
+
+                    Vector2 nodeBottomRight = node.position + nodeSize;
+
+                    //Get top left pos
+                    if (node.position.x < topLeftPos.x)
+                        topLeftPos.x = node.position.x;
+                    if (node.position.y < topLeftPos.y)
+                        topLeftPos.y = node.position.y;
+
+                    //Get bottom right pos
+                    if (nodeBottomRight.x > bottomRightPos.x)
+                        bottomRightPos.x = nodeBottomRight.x;
+                    if (nodeBottomRight.y > bottomRightPos.y)
+                        bottomRightPos.y = nodeBottomRight.y;
+                }
+
+                //Expand Comment node to include all nodes
+                Vector2 marginOffsetTop = new Vector2(-50f, -350);
+                Vector2 marginOffsetBottom = new Vector2(50f, 300f);
+
+                topLeftPos += marginOffsetTop;
+                bottomRightPos += marginOffsetBottom;
+
+                Vector2 commentSize = bottomRightPos - topLeftPos;
+
+                newComment.position = topLeftPos;
+                newComment.Width = Mathf.FloorToInt(commentSize.x);
+                newComment.Height = Mathf.FloorToInt(commentSize.y);
+
+
+            }
         }
     }
 }

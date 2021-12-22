@@ -23,6 +23,8 @@ namespace XNodeEditor {
 #endif
 
         public virtual void OnHeaderGUI() {
+            GUIStyle headerStyle = NodeEditorResources.styles.nodeHeader;
+            headerStyle.fontSize = 14;
             GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
         }
 
@@ -90,7 +92,7 @@ namespace XNodeEditor {
             // Call repaint so that the graph window elements respond properly to layout changes coming from Odin
             if (GUIHelper.RepaintRequested) {
                 GUIHelper.ClearRepaintRequest();
-                window.Repaint();
+                //window.Repaint();
             }
 #endif
 

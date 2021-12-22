@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace XNodeEditor {
-    public enum NoodlePath { Curvy, Straight, Angled, ShaderLab }
+    public enum NoodlePath { Curvy, Straight, Angled, ShaderLab, Arrows, CurvyArrows }
     public enum NoodleStroke { Full, Dashed }
 
     public static class NodeEditorPreferences {
@@ -20,10 +20,10 @@ namespace XNodeEditor {
 
         [System.Serializable]
         public class Settings : ISerializationCallbackReceiver {
-            [SerializeField] private Color32 _gridLineColor = new Color(.23f, .23f, .23f);
+            [SerializeField] private Color32 _gridLineColor = new Color(0.45f, 0.45f, 0.45f);
             public Color32 gridLineColor { get { return _gridLineColor; } set { _gridLineColor = value; _gridTexture = null; _crossTexture = null; } }
 
-            [SerializeField] private Color32 _gridBgColor = new Color(.19f, .19f, .19f);
+            [SerializeField] private Color32 _gridBgColor = new Color(0.18f, 0.18f, 0.18f);
             public Color32 gridBgColor { get { return _gridBgColor; } set { _gridBgColor = value; _gridTexture = null; } }
 
             [Obsolete("Use maxZoom instead")]
@@ -47,6 +47,8 @@ namespace XNodeEditor {
             public float noodleThickness = 2f;
 
             public NoodleStroke noodleStroke = NoodleStroke.Full;
+            public Vector2 minimapSize = new Vector2(350f, 220f);
+            public float miniMapZoomCurrentFactor = 30f;
 
             private Texture2D _gridTexture;
             public Texture2D gridTexture {
@@ -140,6 +142,7 @@ namespace XNodeEditor {
             settings.maxZoom = EditorGUILayout.FloatField(new GUIContent("Max", "Upper limit to zoom"), settings.maxZoom);
             settings.minZoom = EditorGUILayout.FloatField(new GUIContent("Min", "Lower limit to zoom"), settings.minZoom);
             EditorGUI.indentLevel--;
+            settings.minimapSize = EditorGUILayout.Vector2Field(new GUIContent("MinimapSize", "Size of minimap in pixels"), settings.minimapSize);
             settings.gridLineColor = EditorGUILayout.ColorField("Color", settings.gridLineColor);
             settings.gridBgColor = EditorGUILayout.ColorField(" ", settings.gridBgColor);
             if (GUI.changed) {
