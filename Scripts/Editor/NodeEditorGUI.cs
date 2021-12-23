@@ -55,7 +55,7 @@ namespace XNodeEditor {
                 onLateGUI = null;
             }
 
-            //Show name of graph currently being edited
+            //Show name of graph currently being edited.
             if ( NodeEditorWindow.current )
             {
                 GUIStyle myStyle = new GUIStyle();
